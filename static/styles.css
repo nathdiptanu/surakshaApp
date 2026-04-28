@@ -147,11 +147,26 @@ body {
   position: relative;
   z-index: 2;
   display: grid;
-  gap: 18px;
+  gap: 20px;
   padding: 34px;
   border-radius: 8px;
   background: rgba(255, 255, 255, .94);
   box-shadow: 0 30px 90px rgba(0, 0, 0, .25);
+}
+
+.login-panel label {
+  gap: 9px;
+}
+
+.login-panel input {
+  min-height: 52px;
+  padding: 14px 15px;
+  border-width: 2px;
+}
+
+.login-panel button {
+  min-height: 52px;
+  margin-top: 4px;
 }
 
 .login-panel h1 {
@@ -748,7 +763,22 @@ td:first-child {
   }
 
   .login-panel {
-    padding: 22px;
+    gap: 18px;
+    padding: 24px 20px 28px;
+  }
+
+  .login-copy {
+    font-size: 14px;
+  }
+
+  .login-panel input {
+    min-height: 54px;
+    padding: 15px 14px;
+  }
+
+  .login-panel button {
+    min-height: 54px;
+    margin-top: 8px;
   }
 
   .hero,
@@ -902,6 +932,10 @@ td:first-child {
   .panel,
   .login-panel {
     padding: 16px;
+  }
+
+  .login-panel {
+    padding: 18px 14px 24px;
   }
 
   .actions.compact {
