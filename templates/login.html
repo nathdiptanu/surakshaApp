@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Suraksha Admin Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body class="login-body">
+    <main class="login-shell">
+      <section class="login-art" aria-hidden="true">
+        <div class="orbit orbit-one"></div>
+        <div class="orbit orbit-two"></div>
+        <div class="floating-card card-a">
+          <span>Suraksha</span>
+          <div></div>
+        </div>
+        <div class="floating-card card-b">
+          <span>SCAN</span>
+          <div></div>
+        </div>
+        <div class="tag-shape"></div>
+      </section>
+
+      <form class="login-panel" method="post">
+        <p class="eyebrow">Admin access</p>
+        <h1>Suraksha</h1>
+        <p class="login-copy">Manage orders, generate QR cards, export PDFs, and keep user details behind your private dashboard.</p>
+        {% if error %}
+        <p class="login-error">{{ error }}</p>
+        {% endif %}
+        <label>Username
+          <input name="username" autocomplete="username" required autofocus>
+        </label>
+        <label>Password
+          <input name="password" type="password" autocomplete="current-password" required>
+        </label>
+        <button type="submit">Enter Dashboard</button>
+      </form>
+    </main>
+  </body>
+</html>

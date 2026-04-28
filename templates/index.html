@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Suraksha QR Card Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Local QR card studio</p>
+          <h1>Suraksha</h1>
+          <p class="hero-copy">Create vibrant scan-only QR cards and stickers. Printed cards stay private; Google Lens opens WhatsApp with the stored details.</p>
+        </div>
+        <div class="stats">
+          <span id="totalCount">0</span>
+          <small>orders stored</small>
+          <a class="logout-link" href="/logout">Logout</a>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <form id="recordForm" class="panel">
+          <div class="panel-head">
+            <h2>Add QR Details</h2>
+            <button type="submit">Create QR</button>
+          </div>
+          <div class="grid">
+            <label>Use case
+              <select name="category" required>
+                {% for key, item in categories.items() %}
+                <option value="{{ key }}">{{ item.label }}</option>
+                {% endfor %}
+              </select>
+            </label>
+            <label>Card format
+              <select name="format" required>
+                {% for key, item in formats.items() %}
+                <option value="{{ key }}">{{ item.label }}</option>
+                {% endfor %}
+              </select>
+            </label>
+            <label>Name
+              <input name="name" required placeholder="Child, elder, employee, owner">
+            </label>
+            <label>Apartment / Address
+              <input name="apartment" required placeholder="Tower, flat, street">
+            </label>
+            <label>Location
+              <input name="location" required placeholder="Area, city, office branch">
+            </label>
+            <label>Emergency contact
+              <input name="emergency_contact" required placeholder="+91 ...">
+            </label>
+            <label>Company
+              <input name="company" placeholder="Optional for employees/assets">
+            </label>
+            <label class="wide">Notes
+              <textarea name="notes" required placeholder="Blood group, vehicle number, batch number, instructions"></textarea>
+            </label>
+          </div>
+        </form>
+
+        <aside class="panel upload-panel">
+          <h2>Bulk Upload</h2>
+          <p>Upload `.csv` or `.xlsx` with columns: category, format, name, apartment, location, emergency_contact, company, notes.</p>
+          <input id="bulkFile" type="file" accept=".csv,.xlsx">
+          <div class="actions">
+            <button id="uploadBtn" type="button">Upload Rows</button>
+            <a class="ghost" href="/sample.csv">Sample CSV</a>
+          </div>
+          <div class="actions">
+            <a class="primary" href="/download/pdf">Download All Cards PDF</a>
+            <a class="ghost" href="/download/orders.xlsx">Orders Excel</a>
+            <a class="ghost" href="/download/orders.csv">Orders CSV</a>
+          </div>
+          <p id="status" class="status"></p>
+        </aside>
+      </section>
+
+      <section class="preview">
+        <div class="section-head">
+          <h2>Latest Card Preview</h2>
+          <button id="latestPdf" type="button">Latest PDF</button>
+        </div>
+        <div id="cards" class="cards"></div>
+      </section>
+
+      <section class="orders">
+        <div class="section-head">
+          <h2>Orders Placed</h2>
+          <div class="actions compact">
+            <a class="ghost" href="/download/orders.xlsx">Excel</a>
+            <a class="ghost" href="/download/orders.csv">CSV</a>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Use case</th>
+                <th>Format</th>
+                <th>Name</th>
+                <th>Location</th>
+                <th>Emergency</th>
+                <th>Company</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody id="ordersBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <template id="cardTemplate">
+      <article class="qr-card">
+        <div class="card-band">
+          <strong>Suraksha</strong>
+          <span class="category"></span>
+        </div>
+        <div class="card-body">
+          <img class="qr-preview" alt="QR code preview">
+          <div>
+            <h3>Scan for details</h3>
+            <p class="meta">Opens WhatsApp with the stored Suraksha information.</p>
+            <p class="code"></p>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <script>
+      window.SURAKSHA_CATEGORIES = {{ categories | tojson }};
+      window.SURAKSHA_FORMATS = {{ formats | tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+  </body>
+</html>
