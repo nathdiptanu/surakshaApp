@@ -92,6 +92,7 @@
         <div class="section-head">
           <h2>Orders Placed</h2>
           <div class="actions compact">
+            <button id="deleteOrdersBtn" class="danger" type="button">Delete History</button>
             <a class="ghost" href="/download/orders.xlsx">Excel</a>
             <a class="ghost" href="/download/orders.csv">CSV</a>
           </div>
@@ -132,6 +133,20 @@
         </div>
       </article>
     </template>
+
+    <div id="deleteModal" class="modal-backdrop" hidden>
+      <form id="deleteForm" class="danger-modal">
+        <h2>Delete all order history?</h2>
+        <p>This will permanently remove every stored Suraksha order from this local database.</p>
+        <label>Cleanup password
+          <input id="cleanupPassword" name="password" type="password" autocomplete="off" required placeholder="Enter password">
+        </label>
+        <div class="actions">
+          <button class="danger" type="submit">Delete Everything</button>
+          <button id="cancelDeleteBtn" class="ghost" type="button">Cancel</button>
+        </div>
+      </form>
+    </div>
 
     <script>
       window.SURAKSHA_CATEGORIES = {{ categories | tojson }};

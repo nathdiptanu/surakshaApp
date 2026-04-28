@@ -354,7 +354,8 @@ textarea {
 
 button,
 .primary,
-.ghost {
+.ghost,
+.danger {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -372,6 +373,12 @@ button,
   background: linear-gradient(135deg, var(--teal), var(--violet));
   color: white;
   box-shadow: 0 10px 20px rgba(0, 184, 212, .2);
+}
+
+.danger {
+  background: linear-gradient(135deg, #e60023, #ff4d00);
+  color: white;
+  box-shadow: 0 10px 20px rgba(230, 0, 35, .22);
 }
 
 .ghost {
@@ -607,6 +614,46 @@ td:first-child {
 
 .compact {
   justify-content: flex-end;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(24, 13, 27, .62);
+  backdrop-filter: blur(5px);
+}
+
+.modal-backdrop[hidden] {
+  display: none;
+}
+
+.danger-modal {
+  width: min(460px, 100%);
+  display: grid;
+  gap: 16px;
+  padding: 26px;
+  border: 3px solid #ff244f;
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(255, 36, 79, .12), rgba(255, 255, 255, .96)),
+    white;
+  box-shadow: 0 32px 90px rgba(0, 0, 0, .34);
+}
+
+.danger-modal h2 {
+  margin-bottom: 0;
+  color: #9a001f;
+}
+
+.danger-modal p {
+  margin-bottom: 0;
+  color: #5c1a24;
+  line-height: 1.5;
+  font-weight: 700;
 }
 
 @media (max-width: 820px) {

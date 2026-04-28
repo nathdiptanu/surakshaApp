@@ -31,11 +31,12 @@ Create `instance/admin_credentials.json` locally or on PythonAnywhere. This file
 {
   "username": "your-admin-username",
   "password": "your-admin-password",
+  "cleanup_password": "your-delete-history-password",
   "secret_key": "use-a-long-random-secret"
 }
 ```
 
-You can also set `SURAKSHA_ADMIN_USERNAME`, `SURAKSHA_ADMIN_PASSWORD`, and `SURAKSHA_SECRET_KEY` as environment variables.
+You can also set `SURAKSHA_ADMIN_USERNAME`, `SURAKSHA_ADMIN_PASSWORD`, `SURAKSHA_CLEANUP_PASSWORD`, and `SURAKSHA_SECRET_KEY` as environment variables.
 
 ## PythonAnywhere notes
 

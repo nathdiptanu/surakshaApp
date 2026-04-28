@@ -69,6 +69,7 @@ def load_private_config() -> dict:
 PRIVATE_CONFIG = load_private_config()
 ADMIN_USERNAME = os.environ.get("SURAKSHA_ADMIN_USERNAME") or PRIVATE_CONFIG.get("username")
 ADMIN_PASSWORD = os.environ.get("SURAKSHA_ADMIN_PASSWORD") or PRIVATE_CONFIG.get("password")
+CLEANUP_PASSWORD = os.environ.get("SURAKSHA_CLEANUP_PASSWORD") or PRIVATE_CONFIG.get("cleanup_password") or "bunty"
 app.config["SECRET_KEY"] = (
     os.environ.get("SURAKSHA_SECRET_KEY")
     or PRIVATE_CONFIG.get("secret_key")
@@ -222,6 +223,13 @@ def get_records(ids: Iterable[int] | None = None) -> list[dict]:
         else:
             rows = conn.execute("SELECT * FROM qr_orders ORDER BY id DESC").fetchall()
     return [row_to_dict(row) for row in rows]
+
+
+def delete_all_records() -> int:
+    with db() as conn:
+        count = conn.execute("SELECT COUNT(*) FROM qr_orders").fetchone()[0]
+        conn.execute("DELETE FROM qr_orders")
+    return count
 
 
 def draw_card(pdf: canvas.Canvas, record: dict, x: float, y: float) -> None:
@@ -378,6 +386,15 @@ def upload_api():
                     continue
 
     return jsonify({"created": created, "count": len(created)})
+
+
+@app.route("/api/records/delete-all", methods=["POST"])
+def delete_all_api():
+    password = request.get_json(force=True).get("password", "")
+    if password != CLEANUP_PASSWORD:
+        return jsonify({"error": "Cleanup password is incorrect."}), 403
+    deleted = delete_all_records()
+    return jsonify({"deleted": deleted})
 
 
 @app.route("/download/pdf")

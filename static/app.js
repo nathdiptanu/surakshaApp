@@ -6,6 +6,10 @@ const totalCount = document.querySelector("#totalCount");
 const uploadBtn = document.querySelector("#uploadBtn");
 const latestPdf = document.querySelector("#latestPdf");
 const ordersBody = document.querySelector("#ordersBody");
+const deleteOrdersBtn = document.querySelector("#deleteOrdersBtn");
+const deleteModal = document.querySelector("#deleteModal");
+const deleteForm = document.querySelector("#deleteForm");
+const cancelDeleteBtn = document.querySelector("#cancelDeleteBtn");
 const categories = window.SURAKSHA_CATEGORIES;
 const formats = window.SURAKSHA_FORMATS;
 
@@ -137,6 +141,43 @@ latestPdf.addEventListener("click", () => {
     return;
   }
   window.location.href = `/download/pdf?ids=${latestPreviewId}`;
+});
+
+deleteOrdersBtn.addEventListener("click", () => {
+  deleteModal.hidden = false;
+  document.querySelector("#cleanupPassword").focus();
+});
+
+cancelDeleteBtn.addEventListener("click", () => {
+  deleteForm.reset();
+  deleteModal.hidden = true;
+});
+
+deleteModal.addEventListener("click", (event) => {
+  if (event.target === deleteModal) {
+    deleteForm.reset();
+    deleteModal.hidden = true;
+  }
+});
+
+deleteForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const password = new FormData(deleteForm).get("password");
+  const response = await fetch("/api/records/delete-all", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password }),
+  });
+  const result = await response.json();
+  if (!response.ok) {
+    statusEl.textContent = result.error || "Could not delete order history.";
+    return;
+  }
+  latestPreviewId = null;
+  deleteForm.reset();
+  deleteModal.hidden = true;
+  statusEl.textContent = `${result.deleted} order records deleted.`;
+  await loadRecords();
 });
 
 setFormatForCategory();
