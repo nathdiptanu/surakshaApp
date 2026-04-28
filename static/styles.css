@@ -20,6 +20,7 @@ body {
   min-height: 100vh;
   font-family: Inter, "Segoe UI", Arial, sans-serif;
   color: var(--ink);
+  overflow-x: hidden;
   background:
     linear-gradient(135deg, rgba(0, 184, 212, .18), transparent 36%),
     linear-gradient(315deg, rgba(255, 47, 125, .16), transparent 34%),
@@ -339,6 +340,7 @@ label {
 input,
 select,
 textarea {
+  min-width: 0;
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 6px;
@@ -366,6 +368,8 @@ button,
   text-decoration: none;
   font-weight: 850;
   cursor: pointer;
+  text-align: center;
+  white-space: normal;
 }
 
 button,
@@ -514,6 +518,7 @@ button,
 }
 
 .format-sticker_round {
+  max-width: 100%;
   width: 320px;
   min-height: 320px;
   border-radius: 50%;
@@ -559,6 +564,7 @@ button,
 }
 
 .format-employee_badge {
+  max-width: 100%;
   width: 310px;
   min-height: 480px;
   border-radius: 8px;
@@ -657,36 +663,132 @@ td:first-child {
 }
 
 @media (max-width: 820px) {
+  body {
+    background:
+      linear-gradient(135deg, rgba(0, 184, 212, .16), transparent 42%),
+      linear-gradient(315deg, rgba(255, 47, 125, .12), transparent 36%),
+      var(--paper);
+  }
+
+  .shell {
+    width: min(100% - 20px, 560px);
+    padding: 10px 0 28px;
+  }
+
+  h1 {
+    font-size: clamp(42px, 15vw, 62px);
+  }
+
+  h2 {
+    font-size: 21px;
+  }
+
   .login-shell {
+    width: min(100% - 20px, 460px);
     grid-template-columns: 1fr;
     min-height: auto;
-    padding: 28px 0;
+    padding: 14px 0 26px;
+    gap: 14px;
   }
 
   .login-art {
-    min-height: 260px;
+    min-height: 180px;
+    overflow: hidden;
+  }
+
+  .orbit {
+    border-width: 18px;
+  }
+
+  .orbit-one {
+    width: 210px;
+    height: 210px;
+    left: -24px;
+    top: 6px;
+  }
+
+  .orbit-two {
+    width: 150px;
+    height: 150px;
+    right: -18px;
+    bottom: 8px;
   }
 
   .floating-card {
-    width: 210px;
+    width: 184px;
+    height: 112px;
+    padding: 14px;
+    box-shadow: 0 18px 36px rgba(0, 0, 0, .18);
+  }
+
+  .floating-card span {
+    font-size: 22px;
+  }
+
+  .floating-card div {
+    width: 52px;
+    height: 52px;
+    margin-top: 10px;
+    border-width: 6px;
   }
 
   .card-a {
-    left: 0;
+    left: 8px;
+    top: 42px;
   }
 
   .card-b {
-    right: 0;
-    top: 120px;
+    right: 4px;
+    top: 66px;
+    width: 158px;
   }
 
   .tag-shape {
     display: none;
   }
 
+  .login-panel {
+    padding: 22px;
+  }
+
   .hero,
   .workspace {
     grid-template-columns: 1fr;
+  }
+
+  .hero {
+    min-height: 0;
+    gap: 18px;
+    padding: 22px;
+  }
+
+  .hero::after {
+    width: 160px;
+    height: 160px;
+    border-width: 18px;
+    inset: auto -62px -64px auto;
+  }
+
+  .hero-copy {
+    font-size: 15px;
+  }
+
+  .stats {
+    padding: 16px;
+    width: 100%;
+  }
+
+  .stats span {
+    font-size: 36px;
+  }
+
+  .workspace {
+    gap: 14px;
+    margin-top: 14px;
+  }
+
+  .panel {
+    padding: 16px;
   }
 
   .grid {
@@ -700,18 +802,118 @@ td:first-child {
     flex-direction: column;
   }
 
+  .actions.compact {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .actions.compact .danger {
+    grid-column: 1 / -1;
+  }
+
   .cards {
     grid-template-columns: 1fr;
   }
 
+  .qr-card,
+  .format-jacket_tag,
+  .format-vehicle_sticker,
+  .format-employee_badge,
+  .format-sticker_round {
+    width: 100%;
+    max-width: 100%;
+    min-height: 0;
+    border-radius: 8px;
+  }
+
+  .format-sticker_round {
+    aspect-ratio: auto;
+  }
+
+  .card-band {
+    min-height: 48px;
+    padding: 12px 14px;
+  }
+
+  .card-band strong {
+    font-size: 22px;
+  }
+
+  .card-band span {
+    overflow-wrap: anywhere;
+    text-align: right;
+  }
+
   .card-body,
-  .format-vehicle_sticker .card-body {
+  .format-vehicle_sticker .card-body,
+  .format-sticker_round .card-body,
+  .format-employee_badge .card-body {
     grid-template-columns: 1fr;
+    display: grid;
+    gap: 14px;
+    padding: 18px;
     text-align: center;
   }
 
-  .format-sticker_round,
-  .format-employee_badge {
-    width: 100%;
+  .qr-preview,
+  .format-vehicle_sticker .qr-preview,
+  .format-sticker_round .qr-preview,
+  .format-employee_badge .qr-preview {
+    width: min(150px, 58vw);
+    justify-self: center;
+  }
+
+  .qr-card h3,
+  .format-sticker_round h3 {
+    font-size: 22px;
+  }
+
+  .code {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .table-wrap {
+    border-radius: 8px;
+  }
+
+  table {
+    min-width: 760px;
+  }
+
+  th,
+  td {
+    padding: 10px;
+    font-size: 12px;
+  }
+
+  .danger-modal {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 420px) {
+  .shell,
+  .login-shell {
+    width: calc(100% - 14px);
+  }
+
+  .hero,
+  .panel,
+  .login-panel {
+    padding: 16px;
+  }
+
+  .actions.compact {
+    grid-template-columns: 1fr;
+  }
+
+  .card-band {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .card-band span {
+    text-align: left;
   }
 }
