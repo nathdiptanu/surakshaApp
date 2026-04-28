@@ -105,12 +105,16 @@ def db() -> sqlite3.Connection:
 
 def init_db() -> None:
     with db() as conn:
+        if DB_PATH.exists() and not (DATA_DIR / "suretrace.db.bak").exists():
+            shutil.copy2(DB_PATH, DATA_DIR / "suretrace.db.bak")
+
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS qr_orders (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 code TEXT NOT NULL UNIQUE,
                 category TEXT NOT NULL DEFAULT 'kids',
+                format TEXT NOT NULL DEFAULT 'pvc',
                 name TEXT,
                 apartment TEXT,
                 location TEXT,
@@ -119,6 +123,26 @@ def init_db() -> None:
                 company TEXT,
                 notes TEXT,
                 created_at TEXT NOT NULL
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS deleted_qr_orders (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                original_id INTEGER NOT NULL,
+                code TEXT NOT NULL,
+                category TEXT NOT NULL DEFAULT 'kids',
+                format TEXT NOT NULL DEFAULT 'pvc',
+                name TEXT,
+                apartment TEXT,
+                location TEXT,
+                emergency_contact TEXT,
+                amount REAL NOT NULL DEFAULT 0,
+                company TEXT,
+                notes TEXT,
+                created_at TEXT NOT NULL,
+                deleted_at TEXT NOT NULL
             )
             """
         )
@@ -278,9 +302,38 @@ def get_records(ids: Iterable[int] | None = None) -> list[dict]:
     return [row_to_dict(row) for row in rows]
 
 
+def get_deleted_records() -> list[dict]:
+    with db() as conn:
+        rows = conn.execute("SELECT * FROM deleted_qr_orders ORDER BY deleted_at DESC").fetchall()
+    return [row_to_dict(row) for row in rows]
+
+
+def archive_records(conn: sqlite3.Connection, ids: Iterable[int] | None = None) -> int:
+    if ids:
+        placeholders = ",".join("?" for _ in ids)
+        rows = conn.execute(f"SELECT * FROM qr_orders WHERE id IN ({placeholders})", ids).fetchall()
+    else:
+        rows = conn.execute("SELECT * FROM qr_orders").fetchall()
+    if not rows:
+        return 0
+
+    deleted_at = datetime.now().isoformat(timespec="seconds")
+    for row in rows:
+        record = row_to_dict(row)
+        conn.execute(
+            """
+            INSERT INTO deleted_qr_orders
+            (original_id, code, category, format, name, apartment, location, emergency_contact, amount, company, notes, created_at, deleted_at)
+            VALUES (:original_id, :code, :category, :format, :name, :apartment, :location, :emergency_contact, :amount, :company, :notes, :created_at, :deleted_at)
+            """,
+            {**record, "original_id": record["id"], "deleted_at": deleted_at},
+        )
+    return len(rows)
+
+
 def delete_all_records() -> int:
     with db() as conn:
-        count = conn.execute("SELECT COUNT(*) FROM qr_orders").fetchone()[0]
+        count = archive_records(conn)
         conn.execute("DELETE FROM qr_orders")
     return count
 
@@ -290,10 +343,11 @@ def delete_records(ids: Iterable[int]) -> int:
     if not ids:
         return 0
     with db() as conn:
-        placeholders = ",".join("?" for _ in ids)
-        count = conn.execute(f"SELECT COUNT(*) FROM qr_orders WHERE id IN ({placeholders})", ids).fetchone()[0]
-        conn.execute(f"DELETE FROM qr_orders WHERE id IN ({placeholders})", ids)
-    return count
+        archived = archive_records(conn, ids)
+        if archived:
+            placeholders = ",".join("?" for _ in ids)
+            conn.execute(f"DELETE FROM qr_orders WHERE id IN ({placeholders})", ids)
+    return archived
 
 
 def draw_card(pdf: canvas.Canvas, record: dict, x: float, y: float) -> None:
@@ -472,6 +526,11 @@ def records_api():
     return jsonify(get_records())
 
 
+@app.route("/api/deleted-records")
+def deleted_records_api():
+    return jsonify(get_deleted_records())
+
+
 @app.route("/api/upload", methods=["POST"])
 def upload_api():
     file = request.files.get("file")
@@ -547,6 +606,20 @@ def download_orders():
         output.getvalue(),
         mimetype="text/csv",
         headers={"Content-Disposition": "attachment; filename=suretrace_orders.csv"},
+    )
+
+
+@app.route("/download/deleted-orders.csv")
+def download_deleted_orders():
+    records = get_deleted_records()
+    output = io.StringIO()
+    writer = csv.DictWriter(output, fieldnames=["id", "original_id", "code", *FIELDS, "created_at", "deleted_at"])
+    writer.writeheader()
+    writer.writerows(records)
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment; filename=suretrace_deleted_orders.csv"},
     )
 
 

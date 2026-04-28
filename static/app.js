@@ -18,10 +18,13 @@ const deleteModalTitle = document.querySelector("#deleteModalTitle");
 const deleteModalMessage = document.querySelector("#deleteModalMessage");
 const confirmDeleteBtn = document.querySelector("#confirmDeleteBtn");
 const previewSelectedBtn = document.querySelector("#previewSelectedBtn");
+const deletedBody = document.querySelector("#deletedBody");
+const deletedCount = document.querySelector("#deletedCount");
 const categories = window.SURETRACE_CATEGORIES;
 const formats = window.SURETRACE_FORMATS;
 
 let records = [];
+let deletedRecords = [];
 let latestPreviewId = null;
 let deleteMode = "all";
 
@@ -142,11 +145,45 @@ function renderOrders() {
   updateSelectionSummary();
 }
 
+async function loadDeletedRecords() {
+  const response = await fetch("/api/deleted-records");
+  deletedRecords = await response.json();
+  renderDeletedRecords();
+}
+
+function renderDeletedRecords() {
+  deletedBody.innerHTML = "";
+  deletedRecords.forEach((record) => {
+    const style = categories[record.category] || categories.other;
+    const format = formats[record.format] || formats.pvc;
+    const row = document.createElement("tr");
+    [
+      ["Original ID", record.original_id],
+      ["Code", record.code],
+      ["Use case", style.label],
+      ["Format", format.label],
+      ["Name", record.name],
+      ["Location", record.location],
+      ["Emergency", record.emergency_contact],
+      ["Amount", formatCurrency(record.amount)],
+      ["Deleted At", record.deleted_at],
+    ].forEach(([label, value]) => {
+      const cell = document.createElement("td");
+      cell.dataset.label = label;
+      cell.textContent = value;
+      row.appendChild(cell);
+    });
+    deletedBody.appendChild(row);
+  });
+  deletedCount.textContent = `${deletedRecords.length} deleted`;
+}
+
 async function loadRecords() {
   const response = await fetch("/api/records");
   records = await response.json();
   renderLatestCard();
   renderOrders();
+  await loadDeletedRecords();
 }
 
 form.elements.category.addEventListener("change", setFormatForCategory);

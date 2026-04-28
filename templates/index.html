@@ -136,6 +136,37 @@
           </table>
         </div>
       </section>
+
+      <section class="deleted-orders">
+        <div class="section-head">
+          <div>
+            <h2>Deleted Items</h2>
+            <p class="section-note">Removed orders are archived here so nothing is lost during cleanup.</p>
+          </div>
+          <div class="actions compact order-actions">
+            <span id="deletedCount" class="section-note">0 deleted</span>
+            <a class="ghost" id="downloadDeletedCsv" href="/download/deleted-orders.csv">Download Deleted CSV</a>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Original ID</th>
+                <th>Code</th>
+                <th>Use case</th>
+                <th>Format</th>
+                <th>Name</th>
+                <th>Location</th>
+                <th>Emergency</th>
+                <th>Amount</th>
+                <th>Deleted At</th>
+              </tr>
+            </thead>
+            <tbody id="deletedBody"></tbody>
+          </table>
+        </div>
+      </section>
     </main>
 
     <template id="cardTemplate">
