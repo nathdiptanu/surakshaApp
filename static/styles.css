@@ -509,7 +509,7 @@ button,
 }
 
 .section-note {
-  margin: 6px 0 0;
+  margin: 6px 0 12px;
   color: var(--muted);
   font-size: 13px;
   font-weight: 800;
@@ -522,7 +522,7 @@ button,
 
 .cards {
   display: grid;
-  grid-template-columns: minmax(280px, 460px);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 16px;
   margin-top: 14px;
 }
@@ -1104,13 +1104,13 @@ button:disabled {
   }
 
   .actions.compact {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   .actions.compact .danger,
   .actions.compact .soft-danger {
-    grid-column: 1 / -1;
+    flex: 1 1 auto;
   }
 
   .cards {

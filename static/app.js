@@ -17,6 +17,7 @@ const cancelDeleteBtn = document.querySelector("#cancelDeleteBtn");
 const deleteModalTitle = document.querySelector("#deleteModalTitle");
 const deleteModalMessage = document.querySelector("#deleteModalMessage");
 const confirmDeleteBtn = document.querySelector("#confirmDeleteBtn");
+const previewSelectedBtn = document.querySelector("#previewSelectedBtn");
 const categories = window.SURETRACE_CATEGORIES;
 const formats = window.SURETRACE_FORMATS;
 
@@ -55,6 +56,7 @@ function updateSelectionSummary() {
     ? `${selected.length} selected | ${formatCurrency(selectedAmount)}`
     : "Select mistaken orders to delete them safely.";
   deleteSelectedBtn.disabled = selected.length === 0;
+  previewSelectedBtn.disabled = selected.length === 0;
   selectAllOrders.checked = records.length > 0 && selected.length === records.length;
   selectAllOrders.indeterminate = selected.length > 0 && selected.length < records.length;
 }
@@ -216,6 +218,13 @@ function openDeleteModal(mode) {
 
 deleteOrdersBtn.addEventListener("click", () => openDeleteModal("all"));
 deleteSelectedBtn.addEventListener("click", () => openDeleteModal("selected"));
+previewSelectedBtn.addEventListener("click", () => {
+  const selected = selectedOrderIds();
+  if (selected.length === 0) return;
+  latestPreviewId = selected[0]; // Preview the first selected
+  renderLatestCard();
+  statusEl.textContent = `Previewing ${selected.length} selected card(s).`;
+});
 
 selectAllOrders.addEventListener("change", () => {
   document.querySelectorAll(".order-select").forEach((item) => {
