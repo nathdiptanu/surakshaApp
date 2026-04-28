@@ -15,7 +15,7 @@ Open `http://127.0.0.1:5000`.
 Upload `.csv` or `.xlsx` files with these headers:
 
 ```text
-category,format,name,apartment,location,emergency_contact,company,notes
+category,format,name,apartment,location,emergency_contact,amount,company,notes
 ```
 
 Supported categories are `kids`, `elderly`, `bike`, `car`, `employee`, and `other`.

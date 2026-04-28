@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>SureTrace QR Card Generator</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css', v='20260428-login-layout') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css', v='20260428-amount-history') }}">
   </head>
   <body>
     <main class="shell">
@@ -18,8 +18,16 @@
           <p class="hero-copy">Create vibrant scan-only QR cards and stickers. Printed cards stay private; Google Lens opens WhatsApp with the stored details.</p>
         </div>
         <div class="stats">
-          <span id="totalCount">0</span>
-          <small>orders stored</small>
+          <div class="stat-grid">
+            <div>
+              <span id="totalCount">0</span>
+              <small>orders stored</small>
+            </div>
+            <div>
+              <span id="totalAmount">₹0</span>
+              <small>amount incurred</small>
+            </div>
+          </div>
           <a class="logout-link" href="/logout">Logout</a>
         </div>
       </section>
@@ -57,6 +65,9 @@
             <label>Emergency contact
               <input name="emergency_contact" required placeholder="+91 ...">
             </label>
+            <label>Amount
+              <input name="amount" type="number" min="0" step="0.01" required placeholder="Cost per card/sticker">
+            </label>
             <label>Company
               <input name="company" placeholder="Optional for employees/assets">
             </label>
@@ -68,7 +79,7 @@
 
         <aside class="panel upload-panel">
           <h2>Bulk Upload</h2>
-          <p>Upload `.csv` or `.xlsx` with columns: category, format, name, apartment, location, emergency_contact, company, notes.</p>
+          <p>Upload `.csv` or `.xlsx` with columns: category, format, name, apartment, location, emergency_contact, amount, company, notes.</p>
           <input id="bulkFile" type="file" accept=".csv,.xlsx">
           <div class="actions">
             <button id="uploadBtn" type="button">Upload Rows</button>
@@ -93,8 +104,12 @@
 
       <section class="orders">
         <div class="section-head">
-          <h2>Orders Placed</h2>
-          <div class="actions compact">
+          <div>
+            <h2>Orders Placed</h2>
+            <p id="selectionSummary" class="section-note">Select mistaken orders to delete them safely.</p>
+          </div>
+          <div class="actions compact order-actions">
+            <button id="deleteSelectedBtn" class="danger soft-danger" type="button">Delete Selected</button>
             <button id="deleteOrdersBtn" class="danger" type="button">Delete History</button>
             <a class="ghost" href="/download/orders.xlsx">Excel</a>
             <a class="ghost" href="/download/orders.csv">CSV</a>
@@ -104,12 +119,14 @@
           <table>
             <thead>
               <tr>
+                <th><input id="selectAllOrders" type="checkbox" aria-label="Select all orders"></th>
                 <th>ID</th>
                 <th>Use case</th>
                 <th>Format</th>
                 <th>Name</th>
                 <th>Location</th>
                 <th>Emergency</th>
+                <th>Amount</th>
                 <th>Company</th>
                 <th>Created</th>
               </tr>
@@ -143,13 +160,13 @@
 
     <div id="deleteModal" class="modal-backdrop" hidden>
       <form id="deleteForm" class="danger-modal">
-        <h2>Delete all order history?</h2>
-        <p>This will permanently remove every stored SureTrace order from this local database.</p>
+        <h2 id="deleteModalTitle">Delete all order history?</h2>
+        <p id="deleteModalMessage">This will permanently remove stored SureTrace orders from this local database.</p>
         <label>Cleanup password
           <input id="cleanupPassword" name="password" type="password" autocomplete="off" required placeholder="Enter password">
         </label>
         <div class="actions">
-          <button class="danger" type="submit">Delete Everything</button>
+          <button id="confirmDeleteBtn" class="danger" type="submit">Delete Everything</button>
           <button id="cancelDeleteBtn" class="ghost" type="button">Cancel</button>
         </div>
       </form>

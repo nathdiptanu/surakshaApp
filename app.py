@@ -54,6 +54,7 @@ FIELDS = [
     "apartment",
     "location",
     "emergency_contact",
+    "amount",
     "company",
     "notes",
 ]
@@ -114,6 +115,7 @@ def init_db() -> None:
                 apartment TEXT,
                 location TEXT,
                 emergency_contact TEXT,
+                amount REAL NOT NULL DEFAULT 0,
                 company TEXT,
                 notes TEXT,
                 created_at TEXT NOT NULL
@@ -123,6 +125,8 @@ def init_db() -> None:
         columns = [row["name"] for row in conn.execute("PRAGMA table_info(qr_orders)").fetchall()]
         if "format" not in columns:
             conn.execute("ALTER TABLE qr_orders ADD COLUMN format TEXT NOT NULL DEFAULT 'pvc'")
+        if "amount" not in columns:
+            conn.execute("ALTER TABLE qr_orders ADD COLUMN amount REAL NOT NULL DEFAULT 0")
 
 
 def row_to_dict(row: sqlite3.Row) -> dict:
@@ -130,14 +134,54 @@ def row_to_dict(row: sqlite3.Row) -> dict:
 
 
 def normalize_record(source: dict) -> dict:
-    data = {field: (source.get(field) or "").strip() for field in FIELDS}
+    data = {field: str(source.get(field) or "").strip() for field in FIELDS}
+    data["amount"] = first_present(
+        source,
+        [
+            "amount",
+            "cost",
+            "price",
+            "card_cost",
+            "sticker_cost",
+            "cost_each",
+            "unit_cost",
+            "cost_of_each_card",
+            "cost_of_each_sticker",
+            "amount_of_card",
+            "amount_of_sticker",
+        ],
+    )
     data["category"] = data["category"].lower() if data["category"] else "kids"
     if data["category"] not in CATEGORIES:
         data["category"] = "other"
     data["format"] = data["format"].lower() if data["format"] else default_format(data["category"])
     if data["format"] not in FORMATS:
         data["format"] = default_format(data["category"])
+    data["amount"] = parse_amount(data["amount"])
     return data
+
+
+def first_present(source: dict, keys: list[str]):
+    for key in keys:
+        value = source.get(key)
+        if value not in ("", None):
+            return value
+    return ""
+
+
+def parse_amount(value) -> float | None:
+    if value is None:
+        return None
+    text = str(value).strip().replace(",", "")
+    if text.startswith("₹"):
+        text = text[1:].strip()
+    if not text:
+        return None
+    try:
+        amount = float(text)
+    except ValueError:
+        return None
+    return round(amount, 2) if amount >= 0 else None
 
 
 def default_format(category: str) -> str:
@@ -151,7 +195,7 @@ def default_format(category: str) -> str:
 
 
 def validate_record(data: dict) -> list[str]:
-    required = ["category", "format", "name", "apartment", "location", "emergency_contact", "notes"]
+    required = ["category", "format", "name", "apartment", "location", "emergency_contact", "amount", "notes"]
     labels = {
         "category": "Use case",
         "format": "Card format",
@@ -159,9 +203,13 @@ def validate_record(data: dict) -> list[str]:
         "apartment": "Apartment / address",
         "location": "Location",
         "emergency_contact": "Emergency contact",
+        "amount": "Amount",
         "notes": "Notes",
     }
-    return [labels[field] for field in required if not data.get(field)]
+    missing = [labels[field] for field in required if data.get(field) in ("", None)]
+    if data.get("amount") is None:
+        missing.append("Valid amount")
+    return missing
 
 
 def whatsapp_message(record: dict) -> str:
@@ -209,8 +257,8 @@ def create_record(data: dict) -> dict:
         cur = conn.execute(
             """
             INSERT INTO qr_orders
-            (code, category, format, name, apartment, location, emergency_contact, company, notes, created_at)
-            VALUES (:code, :category, :format, :name, :apartment, :location, :emergency_contact, :company, :notes, :created_at)
+            (code, category, format, name, apartment, location, emergency_contact, amount, company, notes, created_at)
+            VALUES (:code, :category, :format, :name, :apartment, :location, :emergency_contact, :amount, :company, :notes, :created_at)
             """,
             record,
         )
@@ -234,6 +282,17 @@ def delete_all_records() -> int:
     with db() as conn:
         count = conn.execute("SELECT COUNT(*) FROM qr_orders").fetchone()[0]
         conn.execute("DELETE FROM qr_orders")
+    return count
+
+
+def delete_records(ids: Iterable[int]) -> int:
+    ids = [int(record_id) for record_id in ids]
+    if not ids:
+        return 0
+    with db() as conn:
+        placeholders = ",".join("?" for _ in ids)
+        count = conn.execute(f"SELECT COUNT(*) FROM qr_orders WHERE id IN ({placeholders})", ids).fetchone()[0]
+        conn.execute(f"DELETE FROM qr_orders WHERE id IN ({placeholders})", ids)
     return count
 
 
@@ -451,6 +510,18 @@ def delete_all_api():
     return jsonify({"deleted": deleted})
 
 
+@app.route("/api/records/delete-selected", methods=["POST"])
+def delete_selected_api():
+    payload = request.get_json(force=True)
+    if payload.get("password", "") != CLEANUP_PASSWORD:
+        return jsonify({"error": "Cleanup password is incorrect."}), 403
+    ids = [int(item) for item in payload.get("ids", []) if str(item).isdigit()]
+    if not ids:
+        return jsonify({"error": "Select at least one order to delete."}), 400
+    deleted = delete_records(ids)
+    return jsonify({"deleted": deleted})
+
+
 @app.route("/download/pdf")
 def download_pdf():
     ids = [int(item) for item in request.args.get("ids", "").split(",") if item.isdigit()]
@@ -523,6 +594,7 @@ def sample_csv():
             "apartment": "Green Heights A-304",
             "location": "Whitefield, Bengaluru",
             "emergency_contact": "+91 98765 43210",
+            "amount": "75",
             "company": "",
             "notes": "Blood group O+",
         }
@@ -532,9 +604,10 @@ def sample_csv():
             "category": "employee",
             "format": "employee_badge",
             "name": "Employee Asset",
-            "apartment": "",
+            "apartment": "Office Assets",
             "location": "Pune Office",
-            "emergency_contact": "",
+            "emergency_contact": "+91 90000 00000",
+            "amount": "45",
             "company": "Acme Pvt Ltd",
             "notes": "Asset batch 001",
         }

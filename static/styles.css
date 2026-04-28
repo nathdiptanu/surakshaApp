@@ -366,13 +366,19 @@ h1 {
 
 .stats span {
   display: block;
-  font-size: 48px;
+  font-size: clamp(30px, 4vw, 48px);
   font-weight: 900;
+  line-height: 1;
 }
 
 .stats small {
   color: var(--muted);
   font-weight: 700;
+}
+
+.stat-grid {
+  display: grid;
+  gap: 18px;
 }
 
 .logout-link {
@@ -499,6 +505,13 @@ button,
   min-height: 22px;
   margin: 0;
   color: #0d7f57;
+  font-weight: 800;
+}
+
+.section-note {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13px;
   font-weight: 800;
 }
 
@@ -846,6 +859,27 @@ td:first-child {
   justify-content: flex-end;
 }
 
+.order-actions {
+  flex-wrap: wrap;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  filter: grayscale(.4);
+  opacity: .55;
+}
+
+.soft-danger {
+  background: linear-gradient(135deg, #ff5a5f, #ff8a00);
+}
+
+.order-select,
+#selectAllOrders {
+  width: 18px;
+  height: 18px;
+  accent-color: #ff2f7d;
+}
+
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -1074,7 +1108,8 @@ td:first-child {
     grid-template-columns: 1fr 1fr;
   }
 
-  .actions.compact .danger {
+  .actions.compact .danger,
+  .actions.compact .soft-danger {
     grid-column: 1 / -1;
   }
 
@@ -1151,7 +1186,7 @@ td:first-child {
   }
 
   table {
-    min-width: 760px;
+    min-width: 820px;
   }
 
   th,
@@ -1162,6 +1197,80 @@ td:first-child {
 
   .danger-modal {
     padding: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .orders .section-head {
+    gap: 14px;
+  }
+
+  .table-wrap {
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  table,
+  thead,
+  tbody,
+  tr,
+  th,
+  td {
+    display: block;
+    width: 100%;
+  }
+
+  table {
+    min-width: 0;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tbody {
+    display: grid;
+    gap: 12px;
+  }
+
+  tr {
+    border: 1px solid var(--line);
+    border-left: 5px solid var(--violet);
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 12px 24px rgba(25, 40, 52, .08);
+    overflow: hidden;
+  }
+
+  td {
+    display: grid;
+    grid-template-columns: 108px 1fr;
+    gap: 12px;
+    border-bottom: 1px solid #eef2f6;
+    padding: 10px 12px;
+    overflow-wrap: anywhere;
+  }
+
+  td::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  td:first-child {
+    color: var(--ink);
+  }
+
+  td:last-child {
+    border-bottom: 0;
+  }
+
+  .order-actions {
+    grid-template-columns: 1fr;
   }
 }
 
