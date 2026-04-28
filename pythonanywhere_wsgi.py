@@ -2,7 +2,7 @@ import os
 import sys
 
 
-project_home = os.path.expanduser("~/surakshaApp")
+project_home = os.path.expanduser("~/suretraceApp")
 if project_home not in sys.path:
     sys.path.insert(0, project_home)
 

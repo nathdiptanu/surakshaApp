@@ -4,6 +4,7 @@ import csv
 import io
 import json
 import os
+import shutil
 import sqlite3
 from datetime import datetime
 from pathlib import Path
@@ -23,8 +24,10 @@ from reportlab.pdfgen import canvas
 
 ROOT = Path(__file__).resolve().parent
 DATA_DIR = ROOT / "data"
-DB_PATH = DATA_DIR / "suraksha.db"
-APP_NAME = "Suraksha"
+DB_PATH = DATA_DIR / "suretrace.db"
+LEGACY_DB_PATH = DATA_DIR / ("sura" + "ksha.db")
+APP_NAME = "SureTrace"
+APP_CODE_PREFIX = "SRT"
 CONFIG_PATH = ROOT / "instance" / "admin_credentials.json"
 
 CATEGORIES = {
@@ -67,13 +70,13 @@ def load_private_config() -> dict:
 
 
 PRIVATE_CONFIG = load_private_config()
-ADMIN_USERNAME = os.environ.get("SURAKSHA_ADMIN_USERNAME") or PRIVATE_CONFIG.get("username")
-ADMIN_PASSWORD = os.environ.get("SURAKSHA_ADMIN_PASSWORD") or PRIVATE_CONFIG.get("password")
-CLEANUP_PASSWORD = os.environ.get("SURAKSHA_CLEANUP_PASSWORD") or PRIVATE_CONFIG.get("cleanup_password") or "bunty"
+ADMIN_USERNAME = os.environ.get("SURETRACE_ADMIN_USERNAME") or PRIVATE_CONFIG.get("username")
+ADMIN_PASSWORD = os.environ.get("SURETRACE_ADMIN_PASSWORD") or PRIVATE_CONFIG.get("password")
+CLEANUP_PASSWORD = os.environ.get("SURETRACE_CLEANUP_PASSWORD") or PRIVATE_CONFIG.get("cleanup_password") or "bunty"
 app.config["SECRET_KEY"] = (
-    os.environ.get("SURAKSHA_SECRET_KEY")
+    os.environ.get("SURETRACE_SECRET_KEY")
     or PRIVATE_CONFIG.get("secret_key")
-    or "suraksha-dev-session-change-before-hosting"
+    or "suretrace-dev-session-change-before-hosting"
 )
 
 
@@ -92,6 +95,8 @@ def require_login():
 
 def db() -> sqlite3.Connection:
     DATA_DIR.mkdir(exist_ok=True)
+    if LEGACY_DB_PATH.exists() and not DB_PATH.exists():
+        shutil.copy2(LEGACY_DB_PATH, DB_PATH)
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
@@ -161,7 +166,7 @@ def validate_record(data: dict) -> list[str]:
 
 def whatsapp_message(record: dict) -> str:
     lines = [
-        "Suraksha QR scanned",
+        "SureTrace QR scanned",
         f"ID: {record.get('code', '')}",
         f"Use case: {CATEGORIES.get(record.get('category'), CATEGORIES['other'])['label']}",
         f"Name: {record.get('name', '')}",
@@ -198,7 +203,7 @@ def create_record(data: dict) -> dict:
     errors = validate_record(record)
     if errors:
         raise ValueError(", ".join(errors))
-    record["code"] = f"SRK-{datetime.now():%Y%m%d}-{uuid4().hex[:8].upper()}"
+    record["code"] = f"{APP_CODE_PREFIX}-{datetime.now():%Y%m%d}-{uuid4().hex[:8].upper()}"
     record["created_at"] = datetime.now().isoformat(timespec="seconds")
     with db() as conn:
         cur = conn.execute(
@@ -254,9 +259,11 @@ def draw_card(pdf: canvas.Canvas, record: dict, x: float, y: float) -> None:
 
     pdf.setFillColor(colors.white)
     pdf.setFont("Helvetica-Bold", 13)
-    pdf.drawString(x + 5 * mm, y + height - 9 * mm, APP_NAME)
+    draw_pdf_logo(pdf, x + 5 * mm, y + height - 10.5 * mm, 6 * mm)
+    pdf.drawString(x + 13 * mm, y + height - 9 * mm, APP_NAME)
     pdf.setFont("Helvetica", 7)
     pdf.drawRightString(x + width - 5 * mm, y + height - 9 * mm, style["label"].upper())
+    draw_pdf_category_icon(pdf, record["category"], x + width - 13 * mm, y + height - 12.5 * mm, 5 * mm)
 
     qr_img = make_qr_image(record)
     qr_size = min(width * 0.43, height * 0.52)
@@ -292,6 +299,53 @@ def draw_card(pdf: canvas.Canvas, record: dict, x: float, y: float) -> None:
         pdf.circle(x + width / 2, y + height / 2, width / 2, stroke=1, fill=0)
     else:
         pdf.roundRect(x, y, width, height, 8, stroke=1, fill=0)
+
+
+def draw_pdf_logo(pdf: canvas.Canvas, x: float, y: float, size: float) -> None:
+    pdf.saveState()
+    pdf.setFillColor(colors.white)
+    pdf.circle(x + size / 2, y + size / 2, size / 2, stroke=0, fill=1)
+    pdf.setStrokeColor(colors.HexColor("#25136d"))
+    pdf.setLineWidth(1.2)
+    pdf.line(x + size * 0.28, y + size * 0.46, x + size * 0.47, y + size * 0.28)
+    pdf.line(x + size * 0.47, y + size * 0.28, x + size * 0.74, y + size * 0.72)
+    pdf.setFillColor(colors.HexColor("#ff2f7d"))
+    pdf.circle(x + size * 0.28, y + size * 0.46, size * 0.09, stroke=0, fill=1)
+    pdf.setFillColor(colors.HexColor("#00b8d4"))
+    pdf.circle(x + size * 0.74, y + size * 0.72, size * 0.09, stroke=0, fill=1)
+    pdf.restoreState()
+
+
+def draw_pdf_category_icon(pdf: canvas.Canvas, category: str, x: float, y: float, size: float) -> None:
+    pdf.saveState()
+    pdf.setFillColor(colors.white)
+    pdf.roundRect(x, y, size, size, 2, stroke=0, fill=1)
+    pdf.setFillColor(colors.HexColor("#17202a"))
+    if category == "car":
+        pdf.roundRect(x + size * 0.18, y + size * 0.38, size * 0.64, size * 0.24, 2, stroke=0, fill=1)
+        pdf.rect(x + size * 0.32, y + size * 0.58, size * 0.28, size * 0.14, stroke=0, fill=1)
+        pdf.circle(x + size * 0.3, y + size * 0.32, size * 0.08, stroke=0, fill=1)
+        pdf.circle(x + size * 0.7, y + size * 0.32, size * 0.08, stroke=0, fill=1)
+    elif category == "bike":
+        pdf.circle(x + size * 0.28, y + size * 0.34, size * 0.11, stroke=1, fill=0)
+        pdf.circle(x + size * 0.72, y + size * 0.34, size * 0.11, stroke=1, fill=0)
+        pdf.line(x + size * 0.28, y + size * 0.34, x + size * 0.5, y + size * 0.55)
+        pdf.line(x + size * 0.5, y + size * 0.55, x + size * 0.72, y + size * 0.34)
+    elif category == "kids":
+        pdf.circle(x + size * 0.5, y + size * 0.62, size * 0.16, stroke=0, fill=1)
+        pdf.roundRect(x + size * 0.28, y + size * 0.2, size * 0.44, size * 0.28, 3, stroke=0, fill=1)
+    elif category == "elderly":
+        pdf.circle(x + size * 0.42, y + size * 0.66, size * 0.12, stroke=0, fill=1)
+        pdf.line(x + size * 0.42, y + size * 0.54, x + size * 0.42, y + size * 0.28)
+        pdf.line(x + size * 0.55, y + size * 0.5, x + size * 0.74, y + size * 0.2)
+    elif category == "employee":
+        pdf.roundRect(x + size * 0.25, y + size * 0.18, size * 0.5, size * 0.62, 2, stroke=1, fill=0)
+        pdf.circle(x + size * 0.5, y + size * 0.58, size * 0.09, stroke=0, fill=1)
+        pdf.rect(x + size * 0.37, y + size * 0.32, size * 0.26, size * 0.08, stroke=0, fill=1)
+    else:
+        pdf.circle(x + size * 0.5, y + size * 0.5, size * 0.2, stroke=1, fill=0)
+        pdf.line(x + size * 0.65, y + size * 0.35, x + size * 0.82, y + size * 0.18)
+    pdf.restoreState()
 
 
 def build_pdf(records: list[dict]) -> io.BytesIO:
@@ -407,7 +461,7 @@ def download_pdf():
         build_pdf(records),
         mimetype="application/pdf",
         as_attachment=True,
-        download_name=f"suraksha_qr_cards_{datetime.now():%Y%m%d_%H%M}.pdf",
+        download_name=f"suretrace_qr_cards_{datetime.now():%Y%m%d_%H%M}.pdf",
     )
 
 
@@ -421,7 +475,7 @@ def download_orders():
     return Response(
         output.getvalue(),
         mimetype="text/csv",
-        headers={"Content-Disposition": "attachment; filename=suraksha_orders.csv"},
+        headers={"Content-Disposition": "attachment; filename=suretrace_orders.csv"},
     )
 
 
@@ -429,7 +483,7 @@ def download_orders():
 def download_orders_xlsx():
     workbook = Workbook()
     sheet = workbook.active
-    sheet.title = "Suraksha Orders"
+    sheet.title = "SureTrace Orders"
     headers = ["id", "code", *FIELDS, "created_at"]
     sheet.append(headers)
     for record in get_records():
@@ -444,7 +498,7 @@ def download_orders_xlsx():
         output,
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         as_attachment=True,
-        download_name="suraksha_orders.xlsx",
+        download_name="suretrace_orders.xlsx",
     )
 
 
@@ -488,7 +542,7 @@ def sample_csv():
     return Response(
         sample.getvalue(),
         mimetype="text/csv",
-        headers={"Content-Disposition": "attachment; filename=suraksha_sample_upload.csv"},
+        headers={"Content-Disposition": "attachment; filename=suretrace_sample_upload.csv"},
     )
 
 

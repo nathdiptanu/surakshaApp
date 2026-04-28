@@ -10,8 +10,8 @@ const deleteOrdersBtn = document.querySelector("#deleteOrdersBtn");
 const deleteModal = document.querySelector("#deleteModal");
 const deleteForm = document.querySelector("#deleteForm");
 const cancelDeleteBtn = document.querySelector("#cancelDeleteBtn");
-const categories = window.SURAKSHA_CATEGORIES;
-const formats = window.SURAKSHA_FORMATS;
+const categories = window.SURETRACE_CATEGORIES;
+const formats = window.SURETRACE_FORMATS;
 
 let records = [];
 let latestPreviewId = null;
@@ -56,6 +56,7 @@ function renderLatestCard() {
   article.dataset.id = record.id;
   article.querySelector(".card-band").style.background = `linear-gradient(90deg, ${style.dark}, ${style.accent}, ${style.light})`;
   article.querySelector(".category").textContent = `${style.label} | ${format.label}`;
+  article.querySelector(".category-icon").classList.add(`icon-${record.category}`);
   article.querySelector(".qr-preview").src = `/qr/${record.id}.png`;
   article.querySelector(".code").textContent = record.code;
   cards.appendChild(item);

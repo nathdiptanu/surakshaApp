@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Suraksha Admin Login</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css', v='20260428-login-spacing') }}">
+    <title>SureTrace Admin Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css', v='20260428-suretrace-icons') }}">
   </head>
   <body class="login-body">
     <main class="login-shell">
@@ -12,7 +12,7 @@
         <div class="orbit orbit-one"></div>
         <div class="orbit orbit-two"></div>
         <div class="floating-card card-a">
-          <span>Suraksha</span>
+          <span>SureTrace</span>
           <div></div>
         </div>
         <div class="floating-card card-b">
@@ -24,7 +24,10 @@
 
       <form class="login-panel" method="post">
         <p class="eyebrow">Admin access</p>
-        <h1>Suraksha</h1>
+        <div class="brand-title login-brand">
+          <span class="brand-logo" aria-hidden="true"></span>
+          <h1>SureTrace</h1>
+        </div>
         <p class="login-copy">Manage orders, generate QR cards, export PDFs, and keep user details behind your private dashboard.</p>
         {% if error %}
         <p class="login-error">{{ error }}</p>

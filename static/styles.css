@@ -173,6 +173,10 @@ body {
   color: #25136d;
 }
 
+.login-brand h1 {
+  margin-bottom: 0;
+}
+
 .login-copy {
   color: var(--muted);
   line-height: 1.55;
@@ -266,6 +270,73 @@ h1 {
   margin-bottom: 10px;
   font-size: clamp(48px, 8vw, 92px);
   line-height: .9;
+}
+
+.brand-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-title h1 {
+  margin-bottom: 10px;
+}
+
+.brand-logo {
+  position: relative;
+  flex: 0 0 auto;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 28% 48%, #ff2f7d 0 8%, transparent 9%),
+    radial-gradient(circle at 73% 72%, #00e5ff 0 8%, transparent 9%),
+    linear-gradient(135deg, #fff, #ffe600);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .22);
+}
+
+.brand-logo::before,
+.brand-logo::after {
+  content: "";
+  position: absolute;
+  height: 4px;
+  border-radius: 999px;
+  background: #25136d;
+  transform-origin: left center;
+}
+
+.brand-logo::before {
+  width: 23px;
+  left: 16px;
+  top: 30px;
+  transform: rotate(-42deg);
+}
+
+.brand-logo::after {
+  width: 28px;
+  left: 28px;
+  top: 28px;
+  transform: rotate(57deg);
+}
+
+.brand-logo.mini {
+  width: 28px;
+  height: 28px;
+  box-shadow: none;
+}
+
+.brand-logo.mini::before {
+  width: 12px;
+  left: 8px;
+  top: 15px;
+  height: 2px;
+}
+
+.brand-logo.mini::after {
+  width: 14px;
+  left: 14px;
+  top: 14px;
+  height: 2px;
 }
 
 .hero-copy {
@@ -465,10 +536,141 @@ button,
   font-size: 26px;
 }
 
+.card-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
 .card-band span {
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
+}
+
+.category-icon {
+  position: relative;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .95);
+  box-shadow: inset 0 0 0 2px rgba(23, 32, 42, .12);
+}
+
+.category-icon::before,
+.category-icon::after {
+  content: "";
+  position: absolute;
+  background: #17202a;
+}
+
+.icon-car::before {
+  left: 7px;
+  top: 15px;
+  width: 20px;
+  height: 8px;
+  border-radius: 6px 6px 3px 3px;
+}
+
+.icon-car::after {
+  left: 8px;
+  top: 21px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  box-shadow: 13px 0 0 #17202a, 5px -9px 0 -1px #17202a;
+}
+
+.icon-bike::before {
+  left: 7px;
+  top: 20px;
+  width: 7px;
+  height: 7px;
+  border: 2px solid #17202a;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 14px 0 0 -2px white, 14px 0 0 0 #17202a;
+}
+
+.icon-bike::after {
+  left: 12px;
+  top: 15px;
+  width: 14px;
+  height: 2px;
+  transform: rotate(24deg);
+}
+
+.icon-kids::before {
+  left: 12px;
+  top: 7px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.icon-kids::after {
+  left: 9px;
+  top: 18px;
+  width: 16px;
+  height: 9px;
+  border-radius: 8px 8px 4px 4px;
+}
+
+.icon-elderly::before {
+  left: 11px;
+  top: 8px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.icon-elderly::after {
+  left: 15px;
+  top: 18px;
+  width: 3px;
+  height: 12px;
+  border-radius: 999px;
+  box-shadow: 8px 4px 0 -1px #17202a;
+  transform: rotate(7deg);
+}
+
+.icon-employee::before {
+  left: 10px;
+  top: 7px;
+  width: 14px;
+  height: 20px;
+  border: 2px solid #17202a;
+  border-radius: 3px;
+  background: transparent;
+}
+
+.icon-employee::after {
+  left: 14px;
+  top: 13px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  box-shadow: 0 8px 0 2px #17202a;
+}
+
+.icon-other::before {
+  left: 9px;
+  top: 8px;
+  width: 13px;
+  height: 13px;
+  border: 2px solid #17202a;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.icon-other::after {
+  left: 21px;
+  top: 22px;
+  width: 9px;
+  height: 3px;
+  transform: rotate(45deg);
 }
 
 .card-body {
@@ -694,6 +896,28 @@ td:first-child {
     font-size: clamp(42px, 15vw, 62px);
   }
 
+  .brand-title {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .brand-logo {
+    width: 46px;
+    height: 46px;
+  }
+
+  .brand-logo::before {
+    width: 19px;
+    left: 13px;
+    top: 25px;
+  }
+
+  .brand-logo::after {
+    width: 22px;
+    left: 23px;
+    top: 23px;
+  }
+
   h2 {
     font-size: 21px;
   }
@@ -874,6 +1098,12 @@ td:first-child {
     text-align: right;
   }
 
+  .category-icon {
+    position: absolute;
+    right: 12px;
+    top: 58px;
+  }
+
   .card-body,
   .format-vehicle_sticker .card-body,
   .format-sticker_round .card-body,
@@ -945,6 +1175,7 @@ td:first-child {
   .card-band {
     align-items: flex-start;
     flex-direction: column;
+    padding-right: 58px;
   }
 
   .card-band span {

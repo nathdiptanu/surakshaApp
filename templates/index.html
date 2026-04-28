@@ -3,15 +3,18 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Suraksha QR Card Generator</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css', v='20260428-login-spacing') }}">
+    <title>SureTrace QR Card Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css', v='20260428-suretrace-icons') }}">
   </head>
   <body>
     <main class="shell">
       <section class="hero">
         <div>
           <p class="eyebrow">Local QR card studio</p>
-          <h1>Suraksha</h1>
+          <div class="brand-title">
+            <span class="brand-logo" aria-hidden="true"></span>
+            <h1>SureTrace</h1>
+          </div>
           <p class="hero-copy">Create vibrant scan-only QR cards and stickers. Printed cards stay private; Google Lens opens WhatsApp with the stored details.</p>
         </div>
         <div class="stats">
@@ -120,14 +123,18 @@
     <template id="cardTemplate">
       <article class="qr-card">
         <div class="card-band">
-          <strong>Suraksha</strong>
+          <div class="card-brand">
+            <span class="brand-logo mini" aria-hidden="true"></span>
+            <strong>SureTrace</strong>
+          </div>
           <span class="category"></span>
+          <span class="category-icon" aria-hidden="true"></span>
         </div>
         <div class="card-body">
           <img class="qr-preview" alt="QR code preview">
           <div>
             <h3>Scan for details</h3>
-            <p class="meta">Opens WhatsApp with the stored Suraksha information.</p>
+            <p class="meta">Opens WhatsApp with the stored SureTrace information.</p>
             <p class="code"></p>
           </div>
         </div>
@@ -137,7 +144,7 @@
     <div id="deleteModal" class="modal-backdrop" hidden>
       <form id="deleteForm" class="danger-modal">
         <h2>Delete all order history?</h2>
-        <p>This will permanently remove every stored Suraksha order from this local database.</p>
+        <p>This will permanently remove every stored SureTrace order from this local database.</p>
         <label>Cleanup password
           <input id="cleanupPassword" name="password" type="password" autocomplete="off" required placeholder="Enter password">
         </label>
@@ -149,8 +156,8 @@
     </div>
 
     <script>
-      window.SURAKSHA_CATEGORIES = {{ categories | tojson }};
-      window.SURAKSHA_FORMATS = {{ formats | tojson }};
+      window.SURETRACE_CATEGORIES = {{ categories | tojson }};
+      window.SURETRACE_FORMATS = {{ formats | tojson }};
     </script>
     <script src="{{ url_for('static', filename='app.js') }}"></script>
   </body>
